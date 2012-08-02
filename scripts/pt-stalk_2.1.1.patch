@@ -1,0 +1,219 @@
+--- /home/gtowey/pt-stalk	2012-08-02 15:59:55.116406208 -0700
++++ ./pt-stalk	2012-08-02 15:54:24.000000000 -0700
+@@ -238,21 +238,21 @@
+                [ "$val" = "size" ] && size=1
+                ;;
+             desc)
+                ;;
+             negatable)
+                if [ "$val" = "yes" ]; then
+                   neg=1
+                fi
+                ;;
+             *)
+-               echo "Invalid attribute in $opt_spec: $line" >&2
++               echo "Invalid attribute in $opt_spec: $key $val" >&2
+                exit 1
+          esac 
+       done < "$opt_spec"
+ 
+       if [ -z "$opt" ]; then
+          echo "No long attribute in option spec $opt_spec" >&2
+          exit 1
+       fi
+ 
+       if [ $neg -eq 1 ]; then
+@@ -769,21 +769,23 @@
+       (echo $ts; df -h) >> "$d/$p-df" &
+ 
+       (echo $ts; netstat -antp) >> "$d/$p-netstat"   &
+       (echo $ts; netstat -s)    >> "$d/$p-netstat_s" &
+ 
+       (echo $ts; $CMD_MYSQL $EXT_ARGV -e "SHOW FULL PROCESSLIST\G") \
+          >> "$d/$p-processlist" &
+ 
+       if [ "$have_lock_waits_table" ]; then
+          (echo $ts; lock_waits) >>"$d/$p-lock-waits" &
++         (echo $ts; locks) >> "$d/$p-locks" &
+       fi
++
+    done
+    log "Loop end: $(date +'TS %s.%N %F %T')"
+ 
+    if [ "$have_oprofile" ]; then
+       $CMD_OPCONTROL --stop
+       $CMD_OPCONTROL --dump
+ 
+       local oprofiled_pid=$(_pidof oprofiled | awk '{print $1; exit;}')
+       if [ "$oprofiled_pid" ]; then
+          kill $oprofiled_pid
+@@ -869,20 +871,25 @@
+       b.trx_query AS blocking_query
+    FROM INFORMATION_SCHEMA.INNODB_LOCK_WAITS AS w
+    INNER JOIN INFORMATION_SCHEMA.INNODB_TRX AS b ON b.trx_id = w.blocking_trx_id
+    INNER JOIN INFORMATION_SCHEMA.INNODB_TRX AS r ON r.trx_id = w.requesting_trx_id
+    INNER JOIN INFORMATION_SCHEMA.INNODB_LOCKS AS l ON w.requested_lock_id = l.lock_id
+    LEFT JOIN INFORMATION_SCHEMA.PROCESSLIST AS p ON p.id = b.trx_mysql_thread_id
+    ORDER BY wait_time DESC\G"
+    $CMD_MYSQL $EXT_ARGV -e "$sql2"
+ } 
+ 
++locks() {
++   local sql="SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS"
++   $CMD_MYSQL $EXT_ARGV -e "$sql"
++}
++
+ # ###########################################################################
+ # End collect package
+ # ###########################################################################
+ 
+ # ###########################################################################
+ # Global variables
+ # ###########################################################################
+ TRIGGER_FUNCTION=""
+ RAN_WITH=""
+ EXIT_REASON=""
+@@ -982,21 +989,21 @@
+       EXIT_REASON="no more iterations"
+       return 1  # stop running
+    fi
+ 
+    return 0  # continue running
+ }
+ 
+ sleep_ok() {
+    local seconds="$1"
+    local msg="${2:-""}"
+-   if oktorun; then
++   if oktorun || [[ "$OPT_EXEC_AFTER_SLEEP" ]]; then
+       if [ -n "$msg" ]; then
+          log "$msg"
+       fi
+       sleep $seconds
+    fi
+ }
+ 
+ purge_samples() {
+    local dir="$1"
+    local retention_time="$2"
+@@ -1095,31 +1102,41 @@
+                last_prefix="$prefix"
+ 
+                # Fork and background the collect subroutine which will
+                # run for --run-time seconds.  We (the parent) sleep
+                # while its collecting (hopefully --sleep is longer than
+                # --run-time).
+                (
+                   collect "$OPT_DEST" "$prefix"
+                ) >> "$OPT_DEST/$prefix-output" 2>&1 &
+                log "Collector PID $!"
++	       if [ "$OPT_EXEC_AFTER_COLLECT" ]; then
++	         log "Executing script after collection: $OPT_EXEC_AFTER_COLLECT"
++	         $OPT_EXEC_AFTER_COLLECT
++	       fi
+             else 
+                # There will not be enough disk space, so do not collect.
+                warn "Collect canceled because there will not be enough disk space after collecting another $margin MB"
+             fi
+          fi
+ 
+          # ##################################################################
+          # Done collecting.
+          # ##################################################################
+          ITER=$((ITER + 1))
+          sleep_ok "$OPT_SLEEP" "Sleeping $OPT_SLEEP seconds after collect"
++
++	 if [ "$OPT_EXEC_AFTER_SLEEP" ]; then
++	   log "Executing script after sleep: $OPT_EXEC_AFTER_SLEEP"
++	   $OPT_EXEC_AFTER_SLEEP
++	 fi
++
+       else
+          # Trigger/check/value is ok, sleep until next check.
+          sleep_ok "$OPT_INTERVAL"
+       fi
+ 
+       # Purge old collect file between checks.
+       if [ -d "$OPT_DEST" ]; then
+          purge_samples "$OPT_DEST" "$OPT_RETENTION_TIME"
+       fi
+    done
+@@ -1171,21 +1188,21 @@
+ 
+    # Verify and set TRIGGER_FUNCTION based on --function.
+    if ! set_trg_func "$OPT_FUNCTION"; then
+       option_error "Invalid --function value: $OPT_FUNCTION"
+    fi
+ 
+    if [ -z "$OPT_STALK" -a "$OPT_COLLECT" ]; then
+       # Not stalking; do immediate collect once.
+       OPT_ITERATIONS=1
+       OPT_CYCLES=0
+-      OPT_SLEEP=0
++      #OPT_SLEEP=0
+       OPT_INTERVAL=0
+    fi
+ 
+    usage_or_errors "$0"
+    po_status=$?
+    rm_tmpdir
+    if [ $po_status -ne 0 ]; then
+       [ $OPT_ERRS -gt 0 ] && exit 1
+       exit 0
+    fi
+@@ -1362,20 +1379,21 @@
+   threshold=20
+ 
+ If you're not running the tool as it's designed (as a root user, daemonized)
+ then you'll need to set several options, such as L<"--dest">, to locations that
+ are writable by non-root users.
+ 
+ =head1 OPTIONS
+ 
+ =over
+ 
++
+ =item --collect
+ 
+ default: yes; negatable: yes
+ 
+ Collect system information.  You can negate this option to make the tool watch
+ the system but not actually gather any diagnostic data.
+ 
+ See also L<"--stalk">.
+ 
+ =item --collect-gdb
+@@ -1462,20 +1480,33 @@
+ type: int; default: 5
+ 
+ Don't collect data if the disk has less than this percent free space.
+ This prevents the tool from filling up the disk with diagnostic data.
+ 
+ This option works similarly to L<"--disk-bytes-free"> but specifies a
+ percentage margin of safety instead of a bytes margin of safety.
+ The tool honors both options, and will not collect any data unless both
+ margins are satisfied.
+ 
++=item --exec-after-collect
++
++type: string
++
++Run this script immediately after the collection has been started.
++
++
++=item --exec-after-sleep
++
++type: string
++
++Run this script after collection has been completed, and pt-stalk has waited for L<"--sleep"> seconds.
++
+ =item --function
+ 
+ type: string; default: status
+ 
+ Specifies what to watch for a diagnostic trigger.  The default value watches
+ SHOW GLOBAL STATUS, but you can also watch SHOW PROCESSLIST or supply a plugin
+ file with your own custom code.  This function supplies the value of
+ L<"--variable">, which is then compared against L<"--threshold"> to see if the
+ trigger condition is met.  Additional options may be required as well; see
+ below. Possible values:
