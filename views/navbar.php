@@ -6,7 +6,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="<?php echo site_url(); ?>"><!--<img src="img/anemometer.png">-->Box Rain Gauge</a> 
+      <a class="brand" href="<?php echo site_url(); ?>"><img src="img/raingauge_drops_small.png">Box Rain Gauge</a> 
       <div class="nav-collapse">
         <ul class="nav">
           <li class="dropdown">
