@@ -19,38 +19,40 @@ There are a few things to configure in the conf/config.inc.php file if you want,
 
 The collection scripts are a bit more involved. You'll want to create a separate user account in mysql.  You'll also need to customise a couple of the scripts to put in the address of the web server where you installed the web interface, and change and options you may want to send to pt-stalk.  Then you'll install a service and start it.
 
-* Install the scripts
+#### Install the scripts
 
     cp RainGauge/scripts/raingauge_package_and_send.sh /usr/bin/
     cp RainGauge/scripts/pt-stalk /usr/bin/
 
-* Set up the package and send script
+#### Set up the package and send script
 
     vi /usr/bin/raingauge_package_and_send.sh
 
   Now change SERVER='' to be the web server where you installed the interface.  The collection script will do a http post to copy collected data to a central location
 
-* Set up a new database user in mysql
+#### Set up a new database user in mysql
 
     mysql -uroot -e "GRANT ... ON *.* TO 'raingauge'@'localhost' IDENTIFIED BY 'SuperSecurePass'"
 
-* Add the raingauge service
+#### Add the raingauge service
 
     cp RainGauge/scripts/raingauge_rc /etc/raingauge_rc
     cp RainGauge/scripts/raingauge_service /etc/init.d/raingauge
 
-* Edit the rc file to set up options
+#### Edit the rc file to set up options
 
     vi /etc/raingauge_rc
 
   Edit the following line to use the same password you created for the mysql user:
+
     PT_MYSQL_PASS=''
 
-* Start the service
+#### Start the service
 
     sudo service raingauge start
 
-* Install a cleanup cron
+#### Install a cleanup cron
 
   You will probably want to clean up old collections after a while, try 2 days to start:
+
     [[ -d /box/www/rgauge/collected/ ]] && find /box/www/rgauge/collected/ -mindepth 1 -mtime +2 -exec rm -rf {} \;
