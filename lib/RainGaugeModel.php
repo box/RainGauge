@@ -429,7 +429,7 @@ class RainGaugeModel {
             $context = '';
         }
         $cmd = "grep -h -ri {$context} \"" . addslashes($pattern) . "\" {$file}";
-        print $cmd . "\n";
+        //print $cmd . "\n";
         $output = array();
         exec($cmd, $output);
         return $output;
@@ -461,7 +461,7 @@ class RainGaugeModel {
      * @return type 
      */
     public function get_type($name) {
-        print "$name<br>\n";
+        //print "$name<br>\n";
         return substr($name, 20);
     }
 
