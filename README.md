@@ -55,4 +55,4 @@ The collection scripts are a bit more involved. You'll want to create a separate
 
   You will probably want to clean up old collections after a while, try 2 days to start:
 
-    [[ -d /box/www/rgauge/collected/ ]] && find /box/www/rgauge/collected/ -mindepth 1 -mtime +2 -exec rm -rf {} \;
+    [[ -d /www/RainGauge/collected/ ]] && find /www/RainGauge/collected/ -mindepth 1 -mtime +2 -exec rm -rf {} \;
