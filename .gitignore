@@ -1,1 +1,2 @@
-collected
+collected/*
+!collected/index.html
