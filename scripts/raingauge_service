@@ -8,7 +8,7 @@
 #
 RETVAL=0
 
-# Bring in config variables needed to start up the pt-kill program
+# Bring in config variables needed to start up the pt-stalk program
 source /etc/raingauge_rc
 
 validate_config() {
@@ -26,7 +26,7 @@ ptstalk_start() {
   if (( $RETVAL == 0 ))
   then
     echo "Starting pt-stalk..."
-    HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" "${PT_STALK_EXTRA_OPTIONS}" -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}" 
+    HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
     RETVAL=$?
   fi
   (( $RETVAL == 0 )) && touch /var/lock/subsys/ptstalk
@@ -35,7 +35,7 @@ ptstalk_start() {
 
 ptstalk_stop() {
   echo "Stopping pt-stalk..."
-  killproc -p "${PT_PID_FILE}" 
+  kill $( cat "${PT_PID_FILE}" )
   RETVAL=$?
   [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/ptstalk
   return $RETVAL
