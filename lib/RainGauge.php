@@ -50,7 +50,18 @@ class RainGauge {
 
         $data = array();
         $data['graph_data'] = $this->model->get_collection_graph();
-
+        
+        $data['servers'] = array();
+        foreach( $data['graph_data'] as $series)
+        {
+            $data['servers'][$series['label']] = array ( 'server' => $series['label'], 'sample_count' => count($series['data']), 'last_sample' => date('r',$series['data'][count($series['data'])-1][0]));
+        }
+        
+        $sort_key = 'last_sample';
+        /*
+        usort($data['servers'], function ($a, $b) use ($sort_key) {
+            return $a[$sort_key] < $b[$sort_key];
+        });*/
         $this->load->view("index", $data);
         $this->footer();
     }

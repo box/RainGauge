@@ -327,6 +327,7 @@ class RainGaugeModel {
             throw new Exception("Can't read collection dir {$collection_dir}");
         }
 
+        $last_sample = array();
         while ($entry = readdir($DIR)) {
             if (!is_dir($collection_dir . '/' . $entry) or in_array($entry, array('..', '.'))) {
                 continue;
@@ -345,22 +346,29 @@ class RainGaugeModel {
                 if (is_array($time)) {
                     $timestamp = mktime($time['tm_hour'], $time['tm_min'], $time['tm_sec'], $time['tm_mon'] + 1, $time['tm_mday'], $time['tm_year'] + 1900);
                     $data[$entry][] = array($timestamp, filesize(join('/', array($collection_dir, $entry, $file))));
+                    
+                    if (!array_key_exists($entry, $last_sample) or $timestamp > $last_sample[$entry])
+                    {
+                        $last_sample[$entry] = $timestamp;
+                    }
                 }
             }
             closedir($SERVERDIR);
         }
         closedir($DIR);
 
+        arsort($last_sample);
         $finaldata = array();
-        foreach ($data as $server => $series) {
-
+        $i = 0;
+        foreach ($last_sample as $server => $time) {
+            $series = $data[$server];
             if (!count($series)) {
                 continue;
             }
             usort($series, function ($a, $b) {
                         return $a[0] > $b[0];
                     });
-            $finaldata[] = array('label' => $server, 'data' => $series);
+            $finaldata[] = array('label' => $server, 'data' => $series, 'color' => $i++);
         }
 
         return $finaldata;
