@@ -51,8 +51,7 @@
  TRIGGER_FUNCTION=""
  RAN_WITH=""
  EXIT_REASON=""
--TOOL="pt-stalk"
-+TOOL="pt-stalk-raingauge"
+ TOOL="pt-stalk"
  OKTORUN=1
  ITER=1
  
