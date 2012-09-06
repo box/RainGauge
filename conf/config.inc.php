@@ -3,7 +3,7 @@ $conf['collection_dir'] = 'collected';
 $conf['base_dir'] = dirname($_SERVER['SCRIPT_FILENAME']);
 $conf['tmp_dir'] = "/tmp";
 
-$conf['non_delta_status_vars'] = array('Threads_running', 'Innodb_data_pending_fsyncs', 'Innodb_data_pending_writes','Innodb_data_pending_reads');
+$conf['non_delta_status_vars'] = array('Threads_running', 'Innodb_data_pending_fsyncs', 'Innodb_data_pending_writes','Innodb_data_pending_reads', 'Innodb_os_log_pending_fsyncs', 'Innodb_os_log_pending_writes');
 
 $conf['status_presets'] = array(
 	'Bandwidth'		=> array( 'Bytes_sent', 'Bytes_received' ),

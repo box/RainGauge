@@ -22,7 +22,7 @@ The collection scripts are a bit more involved. You'll want to create a separate
 #### Install the scripts
 
     cp RainGauge/scripts/raingauge_package_and_send.sh /usr/bin/
-    cp RainGauge/scripts/pt-stalk /usr/bin/
+    cp RainGauge/scripts/pt-stalk-raingauge /usr/bin/
 
 #### Set up the package and send script
 

@@ -27,7 +27,6 @@ var TABLE_URL_TIME_END_PARAM = "<?php echo $table_url_time_end_param ?>"
 // Setup options for the plot
 var FLOT_OPTS = {
 	series: {
-		stack: true,
 		bars: { show: true },
 	},
 	legend: { show: false },
@@ -39,7 +38,7 @@ var FLOT_OPTS = {
 // Placeholder for data to plot
 var SERIES_DATA = <?php echo json_encode($servers); ?>;
 var DATA = <?php echo json_encode($graph_data); ?>;
-var plot_obj
+var plot_obj = null;
 /**
  * Callback function for drawing the graph after data is retrieved from an AJAX call
  * @param data 	The array of objects containing time series data to plot.
@@ -58,6 +57,7 @@ function new_plot_data(data) {
 	plot_obj = $.plot(theplot, DATA, FLOT_OPTS);
 	
 	write_server_list(plot_obj.getData());
+	
 }
 
 function format_label_row(label, series, i) {
@@ -92,7 +92,9 @@ $(document).ready( function ()  {
 	// div to insert the flot graph in
 	var theplot = $("#theplot");	
 	new_plot_data(DATA);
+	
 });
+
 </script>
 
 

@@ -3,7 +3,7 @@
 
 # use a modified version of pt stalk instead of the default pt-stalk.  See the github project for the script
 # modified version includes --exec-after-sleep option needed for collection package and send
-PT_STALK_PROG="/usr/bin/pt-stalk"
+PT_STALK_PROG="/usr/bin/pt-stalk-raingauge"
 
 # most common program options
 PT_STALK_VARIABLE="Threads_running"

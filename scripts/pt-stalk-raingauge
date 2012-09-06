@@ -18,6 +18,8 @@ set -u
 
 set -u
 
+PTFUNCNAME=""
+PTDEBUG="${PTDEBUG:-""}"
 EXIT_STATUS=0
 
 log() {
@@ -33,6 +35,10 @@ warn() {
 die() {
    warn "$*"
    exit 1
+}
+
+_d () {
+   [ "$PTDEBUG" ] && echo "# $PTFUNCNAME: $(log "$*")" >&2
 }
 
 # ###########################################################################
@@ -149,7 +155,7 @@ parse_options() {
    OPT_ERRS=0
    OPT_VERSION=""
    OPT_HELP=""
-   PO_DIR="$TMPDIR/po"
+   PO_DIR="$PT_TMPDIR/po"
 
    if [ ! -d "$PO_DIR" ]; then
       mkdir "$PO_DIR"
@@ -245,7 +251,7 @@ _eval_po() {
                fi
                ;;
             *)
-               echo "Invalid attribute in $opt_spec: $key $val" >&2
+               echo "Invalid attribute in $opt_spec: $line" >&2
                exit 1
          esac 
       done < "$opt_spec"
@@ -353,10 +359,10 @@ _parse_command_line() {
             opt="$(echo $opt | awk -F= '{print $1}')"
          fi
 
-         if [ -f "$TMPDIR/po/$opt" ]; then
-            spec="$TMPDIR/po/$opt"
+         if [ -f "$PT_TMPDIR/po/$opt" ]; then
+            spec="$PT_TMPDIR/po/$opt"
          else
-            spec=$(grep "^short form:-$opt\$" "$TMPDIR"/po/* | cut -d ':' -f 1)
+            spec=$(grep "^short form:-$opt\$" "$PT_TMPDIR"/po/* | cut -d ':' -f 1)
             if [ -z "$spec"  ]; then
                option_error "Unknown option: $real_opt"
                continue
@@ -426,7 +432,7 @@ size_to_bytes() {
 
 set -u
 
-TMPDIR=""
+PT_TMPDIR=""
 
 mk_tmpdir() {
    local dir="${1:-""}"
@@ -435,20 +441,20 @@ mk_tmpdir() {
       if [ ! -d "$dir" ]; then
          mkdir "$dir" || die "Cannot make tmpdir $dir"
       fi
-      TMPDIR="$dir"
+      PT_TMPDIR="$dir"
    else
       local tool="${0##*/}"
       local pid="$$"
-      TMPDIR=`mktemp -d /tmp/${tool}.${pid}.XXXXX` \
+      PT_TMPDIR=`mktemp -d -t "${tool}.${pid}.XXXXXX"` \
          || die "Cannot make secure tmpdir"
    fi
 }
 
 rm_tmpdir() {
-   if [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ]; then
-      rm -rf "$TMPDIR"
+   if [ -n "$PT_TMPDIR" ] && [ -d "$PT_TMPDIR" ]; then
+      rm -rf "$PT_TMPDIR"
    fi
-   TMPDIR=""
+   PT_TMPDIR=""
 }
 
 # ###########################################################################
@@ -486,8 +492,16 @@ _lsof() {
    fi
 }
 
+
+
 _which() {
-   [ -x /usr/bin/which ] && /usr/bin/which "$1" 2>/dev/null | awk '{print $1}'
+   if [ -x /usr/bin/which ]; then
+      /usr/bin/which "$1" 2>/dev/null | awk '{print $1}'
+   elif which which 1>/dev/null 2>&1; then
+      which "$1" 2>/dev/null | awk '{print $1}'
+   else
+      echo "$1"
+   fi
 }
 
 # ###########################################################################
@@ -778,7 +792,6 @@ collect() {
          (echo $ts; lock_waits) >>"$d/$p-lock-waits" &
          (echo $ts; locks) >> "$d/$p-locks" &
       fi
-
    done
    log "Loop end: $(date +'TS %s.%N %F %T')"
 
@@ -876,7 +889,7 @@ lock_waits() {
    LEFT JOIN INFORMATION_SCHEMA.PROCESSLIST AS p ON p.id = b.trx_mysql_thread_id
    ORDER BY wait_time DESC\G"
    $CMD_MYSQL $EXT_ARGV -e "$sql2"
-} 
+}
 
 locks() {
    local sql="SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS"
@@ -893,7 +906,7 @@ locks() {
 TRIGGER_FUNCTION=""
 RAN_WITH=""
 EXIT_REASON=""
-TOOL="pt-stalk"
+TOOL="pt-stalk-raingauge"
 OKTORUN=1
 ITER=1
 
@@ -972,7 +985,7 @@ trg_status() {
 
 trg_processlist() {
    local var="$1"
-   local tmpfile="$TMPDIR/processlist"
+   local tmpfile="$PT_TMPDIR/processlist"
    mysqladmin $EXT_ARGV processlist                      > "$tmpfile-1"
    grep_processlist "$tmpfile-1" "$var" "$OPT_MATCH" 0 0 > "$tmpfile-2"
    wc -l "$tmpfile-2" | awk '{print $1}'
@@ -1109,10 +1122,6 @@ stalk() {
                   collect "$OPT_DEST" "$prefix"
                ) >> "$OPT_DEST/$prefix-output" 2>&1 &
                log "Collector PID $!"
-	       if [ "$OPT_EXEC_AFTER_COLLECT" ]; then
-	         log "Executing script after collection: $OPT_EXEC_AFTER_COLLECT"
-	         $OPT_EXEC_AFTER_COLLECT
-	       fi
             else 
                # There will not be enough disk space, so do not collect.
                warn "Collect canceled because there will not be enough disk space after collecting another $margin MB"
@@ -1123,11 +1132,17 @@ stalk() {
          # Done collecting.
          # ##################################################################
          ITER=$((ITER + 1))
+         cycles_true=0
          sleep_ok "$OPT_SLEEP" "Sleeping $OPT_SLEEP seconds after collect"
 
-	 if [ "$OPT_EXEC_AFTER_SLEEP" ]; then
+         if [ "$OPT_EXEC_AFTER_SLEEP" ]; then
 	   log "Executing script after sleep: $OPT_EXEC_AFTER_SLEEP"
 	   $OPT_EXEC_AFTER_SLEEP
+	 fi
+
+	 # Purge old collect file between checks.
+	 if [ -d "$OPT_DEST" ]; then
+	     purge_samples "$OPT_DEST" "$OPT_RETENTION_TIME"
 	 fi
 
       else
@@ -1135,10 +1150,6 @@ stalk() {
          sleep_ok "$OPT_INTERVAL"
       fi
 
-      # Purge old collect file between checks.
-      if [ -d "$OPT_DEST" ]; then
-         purge_samples "$OPT_DEST" "$OPT_RETENTION_TIME"
-      fi
    done
 }
 
@@ -1385,7 +1396,6 @@ are writable by non-root users.
 =head1 OPTIONS
 
 =over
-
 
 =item --collect
 
@@ -1751,7 +1761,7 @@ Place, Suite 330, Boston, MA  02111-1307  USA.
 
 =head1 VERSION
 
-pt-stalk 2.1.1
+pt-stalk 2.1.2
 
 =cut
 

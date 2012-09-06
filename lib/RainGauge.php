@@ -191,6 +191,25 @@ class RainGauge {
                 $data['status_presets'] = $this->conf['status_presets'];
                 $data['default_flot_series'] = array('Threads_running' => true);
             }
+            else if ($file_type == 'lsof')
+            {
+                $groups = array();
+                for ($i=1; $i< count($data['file_lines']); $i++)
+                {
+                    $parts = preg_split("/\s+/", $data['file_lines'][$i]);
+                    $groups[$parts[0]] ++;
+                    $groups[$parts[4]] ++;
+                }
+                
+                
+                $data['file_data'] = "SUMMARY\n";
+                foreach ($groups as $g => $value)
+                {
+                    $data['file_data'] .= "{$g} = {$value}\n";
+                }
+                $data['file_data'] .= "\n";
+                
+            }
         } else {
             $data['file_lines'] = $this->model->sift($data['server'], $data['sample'], get_var('sift'));
         }
