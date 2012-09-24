@@ -153,6 +153,23 @@ class RainGaugeModel {
     }
 
     /**
+     * given a server and filename, get a valid full path to a collection archive file.
+     * 
+     * @param string $server
+     * @param string $file
+     * @return mixed the string representation of the full file path if the file exists. Otherwise, false.
+     */
+    public function get_collection_filename($server, $file) {
+        // TODO: (ganderson) this is horribly insecure. We need to make sure the path doesn't step out of this directory.
+        $file = $this->collection_dir() . '/' . $server . '/' . $file;
+        if (file_exists($file)) {
+            return $file;
+        }
+        return false;
+    }
+
+
+    /**
      * return the contents of a specific file in a sample.
      * 
      * @param string $hostname

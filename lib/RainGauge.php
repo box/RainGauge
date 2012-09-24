@@ -435,6 +435,32 @@ class RainGauge {
         return 0;
     }
 
+    /**
+     * given a server and name of a sample, allow the user to download the file.
+     * 
+     * @return int 
+     */
+    public function download() {
+        // ask model for path to file
+        $server = get_var('server');
+        $file = get_var('file');
+        $filename = $this->model->get_collection_filename($server, $file);
+
+        // stream file
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Cache-Control: private',false);
+        header('Content-type: "application/octet-stream"');
+        header('Content-Disposition: attachment; filename="' . basename($filename) . '";' );
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Length: '. filesize($filename) );
+        ob_clean();
+        flush();
+        readfile($filename);
+        return 0;
+
+    }
 }
 
 ?>
