@@ -1,3 +1,5 @@
 collected/*
 !collected/index.html
 *~
+conf/config2.inc.php
+index2.php

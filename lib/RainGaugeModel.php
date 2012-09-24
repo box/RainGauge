@@ -122,6 +122,7 @@ class RainGaugeModel {
 
         return $result;
     }
+    
 
     /**
      * Given a sample for a server, return it's position in the list of all 
@@ -150,6 +151,37 @@ class RainGaugeModel {
         }
 
         return $n / count($samples) * 100;
+    }
+    
+    public function get_mutex_deltas($hostname, $sample, $ts)
+    {
+        //print "$hostname / $sample / $ts ";
+        $mutex1 = $this->get_file($hostname, $sample, $ts.'-mutex-status1');
+        $mutex2 = $this->get_file($hostname, $sample, $ts.'-mutex-status2');
+        
+        $result = array();
+        for ($i=0; $i < count($mutex1); $i++)
+        {
+            
+            $m1_parts = explode("\t", $mutex1[$i]);
+            $m2_parts = explode("\t", $mutex2[$i]);
+            
+            $mutex_name = $m1_parts[1];
+            
+            list($none, $m1_value) = explode("=", $m1_parts[2]);
+            list($none, $m2_value) = explode("=", $m2_parts[2]);
+            
+            //print "$mutex_name: $m1_value, $m2_value<br>";
+            if (!array_key_exists($mutex_name, $value))
+            {
+                $result[$mutex_name] = $m2_value - $m1_value;
+            }
+            else
+            {
+                $result[$mutex_name] += $m2_value - $m1_value;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -488,6 +520,24 @@ class RainGaugeModel {
     public function get_type($name) {
         //print "$name<br>\n";
         return substr($name, 20);
+    }
+    
+    public function pmp_summary($sample, $file)
+    {
+        $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
+        
+        $cmd = "cat {$file} | awk '
+  BEGIN { s = \"\"; } 
+  /^Thread/ { print s; s = \"\"; } 
+  /^\#/ { if (s != \"\" ) { s = s \",\" $4} else { s = $4 } } 
+  END { print s }' | sort | uniq -c | sort -r -n -k 1,1";
+  
+        $output = array();
+        exec($cmd,$output);
+        //print "<pre>";
+        //print_r($output);
+        //print "</pre>";
+        return join("\n", $output);
     }
 
 }

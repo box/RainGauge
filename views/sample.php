@@ -239,7 +239,7 @@
 	<pre class="prettyprint">
 		<a class="close" href="<?php echo site_url().'?action=server&server='. urlencode($server) ?>" >&times;</a>
 <?php echo $file_data; ?>
-<?php echo join('', $file_lines); ?>
+<?php echo join('', array_map(function ($x) { return htmlspecialchars($x); }, $file_lines)); ?>
 	</pre>
 <?php } ?>
 

@@ -210,6 +210,27 @@ class RainGauge {
                 $data['file_data'] .= "\n";
                 
             }
+            else if ($file_type == 'stacktrace')
+            {
+                $data['file_data'] = htmlspecialchars($this->model->pmp_summary($data['sample'],$data['file']));
+                $data['file_data'] .= "<br/><hr>";
+            }
+            else if ($file_type == 'mutex-status2')
+            {
+                $this_ts = substr($data['data'][0]['name'], 0, 19);
+                $mutexes = $this->model->get_mutex_deltas($data['server'],$data['sample'], $this_ts);
+                /*
+                print "<pre>";
+                print_r($mutexes);
+                print "</pre>";
+                */
+                
+                arsort($mutexes);
+                
+                $data['file_data'] = "MUTEX DELTAS\n";
+                $data['file_data'] .= join("\n", array_map(function ($x,$y) { return "$x = $y"; } , array_keys($mutexes), array_values($mutexes)));
+                $data['file_data'] .= "<hr>";
+            }
         } else {
             $data['file_lines'] = $this->model->sift($data['server'], $data['sample'], get_var('sift'));
         }
