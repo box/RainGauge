@@ -16,14 +16,6 @@
 	</table>
 </div>
 <script>
-// urls to retrieve data from
-/*
-var GRAPH_DATA_URL = "<?php echo $ajax_request_url ?>";
-var GRAPH_PERMALINK_URL = "<?php echo $graph_permalink; ?>";
-var TABLE_BASE_URL = "<?php echo $ajax_table_request_url_base ?>"
-var TABLE_URL_TIME_START_PARAM = "<?php echo $table_url_time_start_param ?>"
-var TABLE_URL_TIME_END_PARAM = "<?php echo $table_url_time_end_param ?>"
-*/
 // Setup options for the plot
 var FLOT_OPTS = {
 	series: {
