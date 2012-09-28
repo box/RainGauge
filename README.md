@@ -32,7 +32,7 @@ The collection scripts are a bit more involved. You'll want to create a separate
 
 #### Set up a new database user in mysql
 
-    mysql -uroot -e "GRANT ... ON *.* TO 'raingauge'@'localhost' IDENTIFIED BY 'SuperSecurePass'"
+    mysql -uroot -e "GRANT PROCESS, SUPER ON *.* TO 'raingauge'@'localhost' IDENTIFIED BY 'SuperSecurePass'"
 
 #### Add the raingauge service
 
