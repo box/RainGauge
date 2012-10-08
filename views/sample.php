@@ -117,12 +117,12 @@
     var FLOT_OPTS = {
 	  series: {
 		  lines: { show: true }, // line graphs!
-		  points: { show: true}, // draw individual data points
+		  points: { show: true} // draw individual data points
 	  },
 	  legend: { noColumns: 2 },
 	  xaxis: { tickDecimals: 0 },
 //	  yaxis: { min: 0 },
-	  selection: { mode: "x" }, // any mouse selections should be along x axis
+	  selection: { mode: "x" } // any mouse selections should be along x axis
     };
 
   function new_plot_data(data) {
@@ -251,7 +251,7 @@
 </table>
 <?php } ?>
 
-<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css"></link>
+<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css">
 <script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js" type="text/javascript">
 </script>
 

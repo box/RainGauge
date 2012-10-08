@@ -41,7 +41,7 @@
     <script src="js/bootstrap-typeahead.js"></script>
     
     <!-- google pretty print -->
-    <link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css"></link>
+    <link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css">
     <script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js" type="text/javascript"></script>
     <script src="js/lang-sql.js" type="text/javascript"></script>
 
