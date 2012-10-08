@@ -95,7 +95,7 @@
 
 <?php if (isset($flot_data)) { ?>
   <div class="row">
-	  <div class="span3"><select id="theselect" size="16" multiple="multiple"></select><br/> <a href="#" class="btn" onclick="update_graph()"/>Update Graph</a></div>
+	  <div class="span3"><select id="theselect" size="16" multiple="multiple"></select><br/> <a href="#" class="btn" onclick="update_graph()">Update Graph</a></div>
 	  <div id="theplot" class="span9" style="height: 300px;"></div>
 	  <div class="span9 offset3">
 		<?php foreach ($status_presets as $name => $values) { ?>
