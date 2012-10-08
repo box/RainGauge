@@ -23,13 +23,13 @@ var TABLE_URL_TIME_END_PARAM = "<?php echo $table_url_time_end_param ?>"
 // Setup options for the plot
 var FLOT_OPTS = {
 	series: {
-		bars: { show: true, fill: true }, // line graphs!
+		bars: { show: true, fill: true } // line graphs!
 //		points: { show: true}, // draw individual data points
 	},
 	legend: { noColumns: 2 },
 	xaxis: { tickDecimals: 0, mode: "time" },
 	yaxis: { min: 0 },
-	selection: { mode: "x" }, // any mouse selections should be along x axis
+	selection: { mode: "x" } // any mouse selections should be along x axis
 };
 
 // Placeholder for data to plot
@@ -47,7 +47,7 @@ function new_samples(data) {
 }
 
 function new_plot_data(data) {
-	// flot requires millseconds, so convert the timestamp from seconds to milliseconds
+	// flot requires milliseconds, so convert the timestamp from seconds to milliseconds
 	for ( var i = 0; i < data.length; i++ )
 	{
 		for ( var j = 0; j < data[i].data.length; j++ )

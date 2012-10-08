@@ -22,7 +22,7 @@ class RainGaugeModel {
     }
 
     /**
-     * when recieving a file upload, call this method.  This is where we 
+     * when receiving a file upload, call this method.  This is where we
      * can define any additional actions on a file upload, such as saving to
      * a database
      * 
@@ -72,7 +72,7 @@ class RainGaugeModel {
 
                 $result[] = array(
                     'timestamp' => $timestamp,
-                    'size' => filesize(join('/', array($collection_dir, $entry, $file))),
+                    'size' => filesize(join('/', array($collection_dir, $file))),
                     'name' => $file,
                 );
             }
@@ -172,7 +172,7 @@ class RainGaugeModel {
             list($none, $m2_value) = explode("=", $m2_parts[2]);
             
             //print "$mutex_name: $m1_value, $m2_value<br>";
-            if (!array_key_exists($mutex_name, $value))
+            if (!array_key_exists($mutex_name, $result))
             {
                 $result[$mutex_name] = $m2_value - $m1_value;
             }
@@ -279,7 +279,7 @@ class RainGaugeModel {
         $result = array();
         foreach ($lines as $line) {
             if (substr($line, 1, 8) == '********') {
-                if (is_array($row)) {
+                if (isset($row) && is_array($row)) {
                     $result[] = $row;
                 }
                 $row = array();
@@ -443,7 +443,7 @@ class RainGaugeModel {
             fwrite($pipes[0], $input);
             fclose($pipes[0]);
 
-            $result = stream_get_contents($pipes[1]) . stream_get_contents($pipe[2]);
+            $result = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
             fclose($pipes[1]);
             fclose($pipes[2]);
 
@@ -462,6 +462,7 @@ class RainGaugeModel {
      * @return string  The result set as a tab-text string
      */
     function result_as_table($result) {
+        $table = '';
         foreach ($result as $row) {
             $table .= join("\t", array_values($row)) . "\n";
         }

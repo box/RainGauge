@@ -29,7 +29,6 @@ class RainGauge {
         $this->load = new Loader();
         if (empty($conf)) {
             throw new Exception("No conf defined");
-            return;
         }
         $this->conf = $conf;
         if (get_var('output')) {

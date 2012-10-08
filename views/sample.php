@@ -95,7 +95,7 @@
 
 <?php if (isset($flot_data)) { ?>
   <div class="row">
-	  <div class="span3"><select id="theselect" size="16" multiple="multiple"></select><br/> <a href="#" class="btn" onclick="update_graph()"/>Update Graph</a></div>
+	  <div class="span3"><select id="theselect" size="16" multiple="multiple"></select><br/> <a href="#" class="btn" onclick="update_graph()">Update Graph</a></div>
 	  <div id="theplot" class="span9" style="height: 300px;"></div>
 	  <div class="span9 offset3">
 		<?php foreach ($status_presets as $name => $values) { ?>
@@ -117,12 +117,12 @@
     var FLOT_OPTS = {
 	  series: {
 		  lines: { show: true }, // line graphs!
-		  points: { show: true}, // draw individual data points
+		  points: { show: true} // draw individual data points
 	  },
 	  legend: { noColumns: 2 },
 	  xaxis: { tickDecimals: 0 },
 //	  yaxis: { min: 0 },
-	  selection: { mode: "x" }, // any mouse selections should be along x axis
+	  selection: { mode: "x" } // any mouse selections should be along x axis
     };
 
   function new_plot_data(data) {
@@ -251,7 +251,7 @@
 </table>
 <?php } ?>
 
-<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css"></link>
+<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css">
 <script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js" type="text/javascript">
 </script>
 
