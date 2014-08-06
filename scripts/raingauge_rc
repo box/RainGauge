@@ -8,9 +8,9 @@ PT_STALK_PROG="/usr/bin/pt-stalk-raingauge"
 # most common program options
 PT_STALK_VARIABLE="Threads_running"
 
-PT_STALK_THRESHOLD="0"
+PT_STALK_THRESHOLD="100"
 
-PT_STALK_CYCLES="2"
+PT_STALK_CYCLES="1"
 PT_STALK_ITERATIONS="1"
 PT_STALK_SLEEP="120"
 PT_STALK_EXECUTE_AFTER="/usr/bin/raingauge_package_and_send.sh"
