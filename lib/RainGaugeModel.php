@@ -2,7 +2,7 @@
 /**
  * class RainGaugeModel
  *
- * handle getting values from the conf file, reading information about 
+ * handle getting values from the conf file, reading information about
  * collections and parsing their data.
  *
  *
@@ -25,10 +25,10 @@ class RainGaugeModel {
      * when receiving a file upload, call this method.  This is where we
      * can define any additional actions on a file upload, such as saving to
      * a database
-     * 
+     *
      * @param string $hostname
      * @param int $port
-     * @param string $filename 
+     * @param string $filename
      */
     function save_file($hostname, $port, $filename) {
         // it's a tar.gz ... we want to examine it and store some metadata
@@ -44,7 +44,7 @@ class RainGaugeModel {
      * given a hostname, read the local directory where collections are stored
      * and return a list of all gzipped samples found, along with the timestamp
      * and size
-     * 
+     *
      * @param string $hostname
      * @param int $starttime
      * @param int $endtime
@@ -82,10 +82,10 @@ class RainGaugeModel {
     }
 
     /**
-     * For a hostname, and a given filename, open the archive and return 
-     * information about the files in it. This will extract the gzip archive to 
+     * For a hostname, and a given filename, open the archive and return
+     * information about the files in it. This will extract the gzip archive to
      * a temp directory.
-     * 
+     *
      * @param string $hostname
      * @param string $filename
      * @return array    list of arrays which describe each file.
@@ -122,15 +122,15 @@ class RainGaugeModel {
 
         return $result;
     }
-    
+
 
     /**
-     * Given a sample for a server, return it's position in the list of all 
+     * Given a sample for a server, return it's position in the list of all
      * samples as a percentage when sorted by time.
-     * 
+     *
      * @param string $hostname
      * @param string $sample
-     * @return int 
+     * @return int
      */
     public function get_sample_percent($hostname, $sample) {
         $samples = $this->list_samples($hostname);
@@ -152,25 +152,25 @@ class RainGaugeModel {
 
         return $n / count($samples) * 100;
     }
-    
+
     public function get_mutex_deltas($hostname, $sample, $ts)
     {
         //print "$hostname / $sample / $ts ";
         $mutex1 = $this->get_file($hostname, $sample, $ts.'-mutex-status1');
         $mutex2 = $this->get_file($hostname, $sample, $ts.'-mutex-status2');
-        
+
         $result = array();
         for ($i=0; $i < count($mutex1); $i++)
         {
-            
+
             $m1_parts = explode("\t", $mutex1[$i]);
             $m2_parts = explode("\t", $mutex2[$i]);
-            
+
             $mutex_name = $m1_parts[1];
-            
+
             list($none, $m1_value) = explode("=", $m1_parts[2]);
             list($none, $m2_value) = explode("=", $m2_parts[2]);
-            
+
             //print "$mutex_name: $m1_value, $m2_value<br>";
             if (!array_key_exists($mutex_name, $result))
             {
@@ -186,7 +186,7 @@ class RainGaugeModel {
 
     /**
      * given a server and filename, get a valid full path to a collection archive file.
-     * 
+     *
      * @param string $server
      * @param string $file
      * @return mixed the string representation of the full file path if the file exists. Otherwise, false.
@@ -203,11 +203,11 @@ class RainGaugeModel {
 
     /**
      * return the contents of a specific file in a sample.
-     * 
+     *
      * @param string $hostname
      * @param string $sample
      * @param string $file
-     * @return array    The lines of the file 
+     * @return array    The lines of the file
      */
     public function get_file($hostname, $sample, $file) {
         $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
@@ -219,13 +219,13 @@ class RainGaugeModel {
 
     /**
      * Many samples are collected multiple times with a timestamp between each
-     * sample.  This function will try to split these types of files into 
+     * sample.  This function will try to split these types of files into
      * an array of pages to make it easier to display part of the file at a time.
-     * 
+     *
      * @param string $hostname
      * @param string $sample
      * @param string $file
-     * @return array an array with an element for each page, which itself is an array of lines for that page 
+     * @return array an array with an element for each page, which itself is an array of lines for that page
      */
     public function get_file_pages($hostname, $sample, $file) {
         $file = $this->get_file($hostname, $sample, $file);
@@ -251,9 +251,9 @@ class RainGaugeModel {
     /**
      * given the text output of the mysqladmin variables dump, parse them into
      * key, value pairs
-     * 
+     *
      * @param array $lines
-     * @return array  array of Variable_name=>Value pairs 
+     * @return array  array of Variable_name=>Value pairs
      */
     function parse_mysqladmin(array $lines) {
         $status = array();
@@ -313,11 +313,11 @@ class RainGaugeModel {
 
     /**
      * run pt-sift on the given sample
-     * 
+     *
      * @param string $hostname
      * @param string $filename
      * @param string $action    the action to pass to pt-sift
-     * @return array    the output from pt-sift 
+     * @return array    the output from pt-sift
      */
     function sift($hostname, $filename, $action = null) {
         $tmp_dir = $this->tmp_dir() . '/' . $filename;
@@ -325,14 +325,21 @@ class RainGaugeModel {
         if (!isset($action)) {
             $action = 'DEFAULT';
         }
-        $cmd = "ACTION=$action pt-sift {$tmp_dir}";
+        // pt-sift required that HOME be defined, but some php
+        // configurations don't set this for proc_open by default
+        $env_home = getenv('HOME');
+        if (!isset($env_home))
+        {
+            $env_home = '/root';
+        }
+        $cmd = "ACTION=$action HOME={$env_home} pt-sift {$tmp_dir}";
         $output = $this->exec_external_script($cmd, 'q');
         return array($output);
     }
 
     /**
      * return the tmp_dir setting configured by the conf file.
-     * 
+     *
      * @return string the tmp dir name
      */
     private function tmp_dir() {
@@ -357,12 +364,12 @@ class RainGaugeModel {
     }
 
     /**
-     * for each server, read it's data from the collection dir, and build 
+     * for each server, read it's data from the collection dir, and build
      * and array suitable to pass to flot for graphing
-     * 
+     *
      * @param string $hostname
      * @return array    array of information about all collections to pass to flot.
-     * 
+     *
      * @throws Exception    when a collection dir cannot be read
      */
     function get_collection_graph($hostname = null) {
@@ -395,7 +402,7 @@ class RainGaugeModel {
                 if (is_array($time)) {
                     $timestamp = mktime($time['tm_hour'], $time['tm_min'], $time['tm_sec'], $time['tm_mon'] + 1, $time['tm_mday'], $time['tm_year'] + 1900);
                     $data[$entry][] = array($timestamp, filesize(join('/', array($collection_dir, $entry, $file))));
-                    
+
                     if (!array_key_exists($entry, $last_sample) or $timestamp > $last_sample[$entry])
                     {
                         $last_sample[$entry] = $timestamp;
@@ -455,9 +462,9 @@ class RainGaugeModel {
 
     /**
      * given an array which represents something like a sql result set with an array
-     * for each row, return the result formatted as tab separated text values and 
+     * for each row, return the result formatted as tab separated text values and
      * a newline at the end of each row.
-     * 
+     *
      * @param type $result
      * @return string  The result set as a tab-text string
      */
@@ -471,7 +478,7 @@ class RainGaugeModel {
 
     /**
      * grep through a sample and return results
-     * 
+     *
      * @param string $hostname
      * @param string $sample
      * @param string $pattern
@@ -495,7 +502,7 @@ class RainGaugeModel {
 
     /**
      * return a list of servers in the collection dir
-     * @return type 
+     * @return type
      */
     public function get_server_list() {
         $servers = array();
@@ -516,23 +523,23 @@ class RainGaugeModel {
     /**
      * given a file name, remove the date prefix to get the file type
      * @param type $name
-     * @return type 
+     * @return type
      */
     public function get_type($name) {
         //print "$name<br>\n";
         return substr($name, 20);
     }
-    
+
     public function pmp_summary($sample, $file)
     {
         $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
-        
+
         $cmd = "cat {$file} | awk '
-  BEGIN { s = \"\"; } 
-  /^Thread/ { print s; s = \"\"; } 
-  /^\#/ { if (s != \"\" ) { s = s \",\" $4} else { s = $4 } } 
+  BEGIN { s = \"\"; }
+  /^Thread/ { print s; s = \"\"; }
+  /^\#/ { if (s != \"\" ) { s = s \",\" $4} else { s = $4 } }
   END { print s }' | sort | uniq -c | sort -r -n -k 1,1";
-  
+
         $output = array();
         exec($cmd,$output);
         //print "<pre>";
