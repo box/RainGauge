@@ -3,3 +3,5 @@ collected/*
 *~
 conf/config2.inc.php
 index2.php
+*.swp
+*.swo
