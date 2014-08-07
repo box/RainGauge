@@ -26,7 +26,12 @@ ptstalk_start() {
   if (( $RETVAL == 0 ))
   then
     echo "Starting pt-stalk..."
-    HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
+    if [[ -z "${PT_STALK_FUNCTION}" ]]
+    then
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
+    else
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --function="${PT_STALK_FUNCTION}" --variable=test_triggered --threshold=0 --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
+    fi
     RETVAL=$?
   fi
   (( $RETVAL == 0 )) && touch /var/lock/subsys/ptstalk
