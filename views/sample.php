@@ -35,7 +35,7 @@
 	 <?php foreach ($data as $f) { ?>
 	 <?php
 		$this_ts = substr($f['name'], 0, 19);
-		if ($this_ts != $current_ts && $this_ts != 'saved_trigger_value')
+		if ($this_ts != $current_ts && $this_ts != 'test_triggers')
 		{
 			$current_ts = $this_ts;
 			?>

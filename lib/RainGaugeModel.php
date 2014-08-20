@@ -115,7 +115,7 @@ class RainGaugeModel {
             if (in_array($file, array('.', '..'))) {
                 continue;
             }
-            if ($file == 'saved_trigger_values'){
+            if ($file == 'test_triggers'){
                 $result[] = array('name' => $file, 'short_name' => $file);
             } else {
  	        $result[] = array('name' => $file, 'short_name' => substr($file, 20));
