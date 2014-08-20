@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# Created by: Matt Agra <magra@box.com>
-# Created on: 07.25.2014
-#
 # This script builds the custom trg_plugin function used by pt-stalk-rainguage
 #
 
-# Gets previous value from file and calculates the change in values
+# Bring in config options for raingauge
+source /etc/raingauge_rc
+
+# Calculates rate (change in value over 1 second) for a given trigger command
 get_delta() {
     local counter_name="$1"
     local new_value="$2"
@@ -39,6 +39,10 @@ trg_plugin() {
     local threads_running="$(mysql $EXT_ARGV -e "SHOW GLOBAL STATUS LIKE 'Threads_running'" -ss | awk '{print $2}')"
 
     # Check triggers against their threshold
+    # Nonzero value will cause pt-stalk-raingauge to collect and is used to reference which trigger was set off
+    # See which trigger set off collector by peeking in /var/log/pt-stalk.log
+    # Checks are formatted this way to handle comparisons involving floating point numbers
+    # To add new trigger, copy the format below and change variables, and increment echo number
     if (( "$(echo "$cpu_percentage" | awk '{print ($1 > 50)}')" )); then
         trigger_status='1'
     elif (( "$(echo "$seconds_behind_master" | awk '{print ($1 > 10)}')" )); then

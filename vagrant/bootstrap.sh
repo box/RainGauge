@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 # Install apache, mysql, and php
+yum install -y perl-DBD-MySQL perl-Time-HiRes perl-IO-Socket-SSL
+wget -q "http://www.percona.com/redir/downloads/percona-toolkit/2.2.9/RPM/percona-toolkit-2.2.9-1.noarch.rpm"
+sudo rpm -i percona-toolkit-2.2.9-1.noarch.rpm
 yum install -y httpd mysql mysql-server php php-mysql vim
 
 # Let apache write to RainGauge's collected directory
@@ -18,6 +21,7 @@ ln -sf /vagrant/RainGauge  /var/www/html/RainGauge
 # Installing RainGauge scripts
 cp /vagrant/RainGauge/scripts/raingauge_package_and_send.sh /usr/bin/
 cp /vagrant/RainGauge/scripts/pt-stalk-raingauge /usr/bin/
+cp /vagrant/RainGauge/scripts/raingauge_triggers.sh /usr/bin/
 
 # Set up new database user
 mysql -uroot -e "GRANT PROCESS, SUPER ON *.* TO 'raingauge'@'localhost' IDENTIFIED BY 'SuperSecurePass'"
