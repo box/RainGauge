@@ -57,7 +57,7 @@ trg_plugin() {
 
     if [[ $trigger_status != "0" ]]
     then
-        cat << EOF > /tmp/raingauge/test_triggers
+        cat << EOF > ${PT_STALK_COLLECT_DIR}/test_triggers
   1) cpu_percentage -- $cpu_percentage > 50
   2) seconds_behind_master -- $seconds_behind_master > 10
   3) threads_created -- $threads_created > 100
