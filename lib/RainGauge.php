@@ -130,11 +130,11 @@ class RainGauge {
         $data['page'] = get_var('page');
 
         $file_type = $this->model->get_type($data['file']);
-        if (get_var('file_type') != null) {
+	if (get_var('file_type') != null) {
             $data['file'] = $this_ts = substr($data['data'][0]['name'], 0, 19) . '-' . get_var('file_type');
-            $file_type = get_var('file_type');
-        }
-        $data['file_type'] = $file_type;
+	    $file_type = get_var('file_type');
+	}
+	$data['file_type'] = $file_type;
 
         if (isset($data['file']) and $data['file'] != '') {
             $paged_file = $this->model->get_file_pages($data['server'], $data['sample'], $data['file']);
