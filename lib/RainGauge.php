@@ -211,7 +211,7 @@ class RainGauge {
             }
             else if ($file_type == 'stacktrace')
             {
-                $data['file_data'] = htmlspecialchars($this->model->pmp_summary($data['sample'],$data['file']));
+                $data['file_data'] = htmlspecialchars($this->model->pmp_summary($data['sample'],$data['file'], $data['server']));
                 $data['file_data'] .= "<br/><hr>";
             }
             else if ($file_type == 'mutex-status2')

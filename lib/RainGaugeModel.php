@@ -94,13 +94,13 @@ class RainGaugeModel {
     function get_sample($hostname, $filename) {
         // get information about stats collected
         $source_file = $this->collection_dir() . '/' . $hostname . '/' . $filename;
-        $tmp_dir = $this->tmp_dir() . '/' . $filename;
+        $tmp_dir = $this->tmp_dir($hostname) . '/' . $filename;
         // print "tmp_dir: {$tmp_dir}</br>";
         if (!file_exists($source_file)) {
             throw new Exception("File {$filename} doesn't exist for {$hostname}");
         }
         if (!is_dir($tmp_dir)) {
-            mkdir($tmp_dir);
+            mkdir($tmp_dir, 0755, true);
             $cmd = "tar -zxf {$source_file} -C {$tmp_dir}";
             //print "cmd: [{$cmd}]<br/>";
             $result = exec($cmd);
@@ -210,7 +210,7 @@ class RainGaugeModel {
      * @return array    The lines of the file
      */
     public function get_file($hostname, $sample, $file) {
-        $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
+        $file = $this->tmp_dir($hostname) . '/' . $sample . '/' . $file;
         if (file_exists($file)) {
             return file($file);
         }
@@ -320,7 +320,7 @@ class RainGaugeModel {
      * @return array    the output from pt-sift
      */
     function sift($hostname, $filename, $action = null) {
-        $tmp_dir = $this->tmp_dir() . '/' . $filename;
+        $tmp_dir = $this->tmp_dir($hostname) . '/' . $filename;
 
         if (!isset($action)) {
             $action = 'DEFAULT';
@@ -340,13 +340,16 @@ class RainGaugeModel {
     /**
      * return the tmp_dir setting configured by the conf file.
      *
+     * @param string $hostname
      * @return string the tmp dir name
      */
-    private function tmp_dir() {
+    private function tmp_dir($hostname) {
         $dir = $this->conf['tmp_dir'];
         if (substr($dir, 0, 1) != '/') {
             $dir = $this->conf['base_dir'] . '/' . $dir;
         }
+        // Create tmpfile per host
+        $dir = $dir . '/' . $hostname;
         return $dir;
     }
 
@@ -487,7 +490,7 @@ class RainGaugeModel {
      * @return array    the results of the grep command
      */
     public function search_sample($hostname, $sample, $pattern, $file, $context) {
-        $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
+        $file = $this->tmp_dir($hostname) . '/' . $sample . '/' . $file;
         if (intval($context)) {
             $context = " -C{$context} ";
         } else {
@@ -530,9 +533,9 @@ class RainGaugeModel {
         return substr($name, 20);
     }
 
-    public function pmp_summary($sample, $file)
+    public function pmp_summary($sample, $file, $hostname)
     {
-        $file = $this->tmp_dir() . '/' . $sample . '/' . $file;
+        $file = $this->tmp_dir($hostname) . '/' . $sample . '/' . $file;
 
         $cmd = "cat {$file} | awk '
   BEGIN { s = \"\"; }
