@@ -15,7 +15,7 @@ Installation of the web interface is super simple!  Just clone the RainGauge pro
 
 	git clone git://github.com/box/RainGauge.git
 
-There are a few things to configure in the conf/config.inc.php file if you want, but those arent't necessary
+There are a few things to configure in the conf/config.inc.php file if you want, but those aren't necessary
 
 ### Installing the collection scripts
 
