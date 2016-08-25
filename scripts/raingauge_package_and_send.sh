@@ -12,7 +12,7 @@ fi
 
 PORT=$(mysql -h localhost -e "select @@port" -ss $userPassArgs)
 DATE=$(ls -r "$PT_STALK_COLLECT_DIR" | tail -n1 | cut -d'-' -f1)
-FILE="$HOSTNAME-$DATE.tar.gz"
+FILE="/tmp/$HOSTNAME-$DATE.tar.gz"
 URL="${RG_WEB_SERVER}/index.php?action=upload&hostname=$HOSTNAME&port=$PORT"
 
 #echo "$FILE"
@@ -23,7 +23,7 @@ fi
 
 tar -zcf "$FILE" -C "$PT_STALK_COLLECT_DIR" .
 if [[ -r "$FILE" ]]; then
-        rm "$PT_STALK_COLLECT_DIR"/*
+        rm -f "$PT_STALK_COLLECT_DIR"/*
 	curl -F "file=@$FILE" $RG_CURL_PARAMS "$URL"
-        rm "$FILE"
+        rm -f "$FILE"
 fi
