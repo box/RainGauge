@@ -13,7 +13,7 @@ fi
 PORT=$(mysql -h localhost -e "select @@port" -ss $userPassArgs)
 DATE=$(ls -r "$PT_STALK_COLLECT_DIR" | tail -n1 | cut -d'-' -f1)
 FILE="$HOSTNAME-$DATE.tar.gz"
-URL="http://${RG_WEB_SERVER}/RainGauge/index.php?action=upload&hostname=$HOSTNAME&port=$PORT"
+URL="${RG_WEB_SERVER}/index.php?action=upload&hostname=$HOSTNAME&port=$PORT"
 
 #echo "$FILE"
 if [[ ! "$DATE" =~ "^[0-9][0-9][0-9][0-9]" ]];
