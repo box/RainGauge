@@ -35,3 +35,6 @@ PT_MYSQL_PASS="SuperSecurePass"
 
 # RainGauge Web Server
 RG_WEB_SERVER="localhost"
+
+# Extra curl parameters when posting to RainGauge Web Server
+RG_CURL_PARAMS=""
