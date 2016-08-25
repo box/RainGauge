@@ -105,8 +105,8 @@
 	  <div class="span12"><hr></div>
   </div>
   
-  <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
-  <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.stack.js"></script>
+  <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.min.js"></script>
+  <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.stack.min.js"></script>
 
 
   <script>
@@ -250,9 +250,5 @@
   <?php } ?>
 </table>
 <?php } ?>
-
-<link href="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.css" rel="stylesheet" type="text/css">
-<script src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js" type="text/javascript">
-</script>
 
 

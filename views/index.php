@@ -1,5 +1,5 @@
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.stack.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.stack.min.js"></script>
 <div class="row">
 	<div id="theplot" class="span12" style="height: 300px;"></div>
 </div>
