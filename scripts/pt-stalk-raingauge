@@ -1110,8 +1110,9 @@ stalk() {
                "$margin"
             if [ $? -eq 0 ]; then
                # There should be enough disk space, so collect.
-               log "$msg"                        >> "$OPT_DEST/$prefix-trigger"
-               log "pt-stalk ran with $RAN_WITH" >> "$OPT_DEST/$prefix-trigger"
+               log "$msg"                            >> "$OPT_DEST/$prefix-trigger"
+               log "pt-stalk ran with $RAN_WITH"     >> "$OPT_DEST/$prefix-trigger"
+               log "$(declare -f $TRIGGER_FUNCTION)" >> "$OPT_DEST/$prefix-trigger"
                last_prefix="$prefix"
 
                # Fork and background the collect subroutine which will
