@@ -1044,8 +1044,7 @@ sigtrap() {
 }
 
 stalk() {
-   local cycles_true=0   # increment each time check is true, else set to 0
-   local matched=""      # set to "yes" when check is true
+   local cycles_true=()  # increment each time check is true, else set to 0
    local last_prefix=""  # prefix of last collection
 
    while oktorun; do
@@ -1055,32 +1054,39 @@ stalk() {
       if [ "$OPT_STALK" ]; then
          local value=$($TRIGGER_FUNCTION $OPT_VARIABLE)
          local trg_exit_status=$?
+         local matched=""      # set to matched trigger when check is true
 
          if [ -z "$value" ]; then
             # No value.  Maybe we failed to connect to MySQL?
             warn "Detected value is empty; something failed?  Trigger exit status: $trg_exit_status"
-            matched=""
-            cycles_true=0
-         elif [ $value -gt $OPT_THRESHOLD ]; then
-            matched="yes"
-            cycles_true=$(($cycles_true + 1))
+            cycles_true=()
          else
-            matched=""
-            cycles_true=0
+            local i=0
+            for line in $value; do
+               IFS='|' read -ra VALS <<< "$line"
+               if [ ${VALS[0]} -gt 0 ]; then
+                  cycles_true[$i]=$((${cycles_true[$i]:-} + 1))
+                  if [ ${cycles_true[$i]:-} -ge ${VALS[1]} ]; then
+                     matched=${VALS[2]}
+                  fi
+               else
+                  cycles_true[$i]=0
+               fi
+               i=$((i + 1))
+            done
          fi
 
-         local msg="Check results: $OPT_VARIABLE=$value, matched=${matched:-no}, cycles_true=$cycles_true"
+         local msg="Check results: matched=${matched:-no}, cycles_true=${cycles_true[@]}, $OPT_VARIABLE=$value"
          log "$msg"
       elif [ "$OPT_COLLECT" ]; then
          # Make the next if condition true.
-         matched=1
-         cycles_true=$OPT_CYCLES
+         matched="immediate"
 
          local msg="Not stalking; collect triggered immediately"
          log "$msg"
       fi
 
-      if [ "$matched" -a $cycles_true -ge $OPT_CYCLES ]; then 
+      if [ "$matched" ]; then
          # ##################################################################
          # Start collecting, maybe.
          # ##################################################################
@@ -1110,9 +1116,10 @@ stalk() {
                "$margin"
             if [ $? -eq 0 ]; then
                # There should be enough disk space, so collect.
-               log "$msg"                            >> "$OPT_DEST/$prefix-trigger"
-               log "pt-stalk ran with $RAN_WITH"     >> "$OPT_DEST/$prefix-trigger"
-               log "$(declare -f $TRIGGER_FUNCTION)" >> "$OPT_DEST/$prefix-trigger"
+               TRIGGER_FILE="$OPT_DEST/$prefix-trigger-$matched"
+               log "$msg"                            >> $TRIGGER_FILE
+               log "pt-stalk ran with $RAN_WITH"     >> $TRIGGER_FILE
+               log "$(declare -f $TRIGGER_FUNCTION)" >> $TRIGGER_FILE
                last_prefix="$prefix"
 
                # Fork and background the collect subroutine which will
@@ -1133,18 +1140,18 @@ stalk() {
          # Done collecting.
          # ##################################################################
          ITER=$((ITER + 1))
-         cycles_true=0
+         cycles_true=()
          sleep_ok "$OPT_SLEEP" "Sleeping $OPT_SLEEP seconds after collect"
 
          if [ "$OPT_EXEC_AFTER_SLEEP" ]; then
-	   log "Executing script after sleep: $OPT_EXEC_AFTER_SLEEP"
-	   $OPT_EXEC_AFTER_SLEEP
-	 fi
+            log "Executing script after sleep: $OPT_EXEC_AFTER_SLEEP"
+            $OPT_EXEC_AFTER_SLEEP
+         fi
 
-	 # Purge old collect file between checks.
-	 if [ -d "$OPT_DEST" ]; then
-	     purge_samples "$OPT_DEST" "$OPT_RETENTION_TIME"
-	 fi
+         # Purge old collect file between checks.
+         if [ -d "$OPT_DEST" ]; then
+            purge_samples "$OPT_DEST" "$OPT_RETENTION_TIME"
+         fi
 
       else
          # Trigger/check/value is ok, sleep until next check.
