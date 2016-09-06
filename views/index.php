@@ -1,5 +1,8 @@
 <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.min.js"></script>
 <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.stack.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.selection.min.js"></script>
+<p class="pull-left">Y Axis: Sample Size</p>
+<button class="btn pull-right" id="resetzoom">Reset Zoom</button>
 <div class="row">
 	<div id="theplot" class="span12" style="height: 300px;"></div>
 </div>
@@ -10,9 +13,6 @@
 -->
 <div class="row">
 	<table id="legend" class="table table-bordered table-striped">
-		<tr>
-			<th></th><th>Server</th><th>Total Samples</th><th>Last Sample</th>
-		</tr>
 	</table>
 </div>
 <script>
@@ -45,11 +45,45 @@ function new_plot_data(data) {
 			data[i].data[j][0] = data[i].data[j][0] - (60*60*7*1000);
 		}
 	}
+
 	var theplot = $("#theplot"); // get the graph div
 	plot_obj = $.plot(theplot, DATA, FLOT_OPTS);
-	
 	write_server_list(plot_obj.getData());
-	
+
+	theplot.bind("plotselected", function (event, ranges) {
+		$.each(plot_obj.getXAxes(), function(_, axis) {
+			var opts = axis.options;
+			opts.min = ranges.xaxis.from;
+			opts.max = ranges.xaxis.to;
+		});
+		plot_obj.setupGrid();
+		plot_obj.draw();
+		plot_obj.clearSelection();
+		oldData = plot_obj.getData();
+		newData = [];
+		for (i = 0; i < oldData.length; i++) {
+			for (x = 0; x < oldData[i].data.length; x++) {
+				ts = oldData[i].data[x][0];
+				if (ts > ranges.xaxis.from && ts < ranges.xaxis.to) {
+					newData.push(oldData[i]);
+					break;
+				}
+			}
+		}
+		write_server_list(newData);
+	});
+
+	$("#resetzoom").bind("click", function(event) {
+		$.each(plot_obj.getXAxes(), function(_, axis) {
+			var opts = axis.options;
+			opts.min = null;
+			opts.max = null;
+		});
+		plot_obj.setupGrid();
+		plot_obj.draw();
+		plot_obj.clearSelection();
+		write_server_list(plot_obj.getData());
+	});
 }
 
 function format_label_row(label, series, i) {
@@ -61,6 +95,7 @@ function format_label_row(label, series, i) {
 function write_server_list(data)
 {
 	legend_table = $('#legend');
+		legend_table.html("<tr><th></th><th>Server</th><th>Total Samples</th><th>Last Sample</th></tr>");
 	for(var i=0; i<data.length; i++) {
 		legend_table.append( format_label_row(data[i].label, data[i], i));
 	}
