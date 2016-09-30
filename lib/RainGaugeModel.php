@@ -112,7 +112,7 @@ class RainGaugeModel {
         $result = array();
         $DIR = opendir($tmp_dir);
         while ($file = readdir($DIR)) {
-            if (in_array($file, array('.', '..', 'saved_trigger_values'))) {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
             $result[] = array('name' => $file,
