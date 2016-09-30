@@ -16,7 +16,7 @@
 					<a href="<?php echo site_url()."?action=server&server=".urlencode($server)."&sort=size" ?>">Size</a> 
 				<?php } ?>
 				</th>
-				<th></th>
+				<th>Trigger</th>
 				<th></th>
 			</tr>
 			
@@ -26,6 +26,7 @@
 					<a href="<?php echo site_url()."?action=sample&server=".urlencode($server)."&sample=".urlencode($s['name']); ?>"><?php echo date("r", $s['timestamp']); ?></a>
 				</td>
 				<td><?php echo $s['size'] ?></td>
+				<td><?php echo $s['trigger'] ?></td>
 				<td><a href="<?php echo site_url()."?action=download&server=".urlencode($server)."&file=".urlencode($s['name']); ?>" class="btn">Download</a> </td>
 			</tr>
 		<?php } ?>
