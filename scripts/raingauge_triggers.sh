@@ -38,21 +38,29 @@ trg_plugin() {
     threads_created="$(get_delta "threads_created" "$(mysql $EXT_ARGV -e "SHOW GLOBAL STATUS LIKE 'Threads_created'" -ss | awk '{print $2}')")"
 
     # Check triggers against their threshold
+    #
     # Nonzero value will cause pt-stalk-raingauge to collect and is used to reference which trigger was set off
     # See which trigger set off collector by peeking in /var/log/pt-stalk.log
     # Checks are formatted this way to handle comparisons involving floating point numbers
-    # To add new trigger, copy the format below and change variables, and increment echo number
-    if (( "$(echo "$seconds_behind_master" | awk '{print ($1 > 10)}')" )); then
-        echo '1'        # seconds_behind_master
-    elif (( "$(echo "$threads_running" | awk '{print ($1 > 150)}')" )); then
-        echo '2'        # threads_running
-    elif (( "$(echo "$cpu_percentage" | awk '{print ($1 > 50)}')" )); then
-        echo '3'        # cpu_percentage
-    elif (( "$(echo "$threads_created" | awk '{print ($1 > 100)}')" )); then
-        echo '4'        # threads_created
-    # elif (( "$(echo "$_triggername" | awk '{print ($1 _comparison _threshold)}')" )); then
-        # echo '5'	# _triggername
-    else
-        echo '0'        # Nothing triggered
-    fi
+    #
+    # The format is: triggered|threshold|name
+    # The threshold is how many times the trigger needs to fire in a row before a collection is processed
+    #
+    # To add new trigger, copy the format below and change variables
+
+    val="$(echo "$seconds_behind_master" | awk '{print ($1 > 10)}')"
+    echo "$val|10|seconds_behind_master"
+
+    val="$(echo "$threads_running" | awk '{print ($1 > 150)}')"
+    echo "$val|5|threads_running"
+
+    val="$(echo "$cpu_percentage" | awk '{print ($1 > 50)}')"
+    echo "$val|5|cpu_percentage"
+
+    val="$(echo "$threads_created" | awk '{print ($1 > 100)}')"
+    echo "$val|5|threads_created"
+
+    # val="$(echo "$variable" | awk '{print ($1 > 0)}')"
+    # echo "$val|threshold|variable"
+
 }

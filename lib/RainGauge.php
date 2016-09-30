@@ -341,7 +341,7 @@ class RainGauge {
             return;
         }
         rename($_FILES["file"]["tmp_name"], $filename);
-        $this->model->save_file($hostname, $port, $target_path);
+        $this->model->save_file($hostname, $port, $filename);
     }
 
     /**

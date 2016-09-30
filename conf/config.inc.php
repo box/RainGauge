@@ -18,4 +18,12 @@ $conf['status_presets'] = array(
 	'Pending'		=> array( 'Innodb_data_pending_fsyncs', 'Innodb_data_pending_writes','Innodb_data_pending_reads'),
 	'Binlog'		=> array( 'binlog_commits', 'binlog_group_commits'),
 );
+
+function extract_trigger($hostname, $port, $filename) {
+	$dir = dirname($filename);
+	$cmd = "tar -xf $filename -C $dir --wildcards --no-anchored '*-trigger-*'";
+	exec($cmd);
+}
+
+$conf['on_file_upload'] = 'extract_trigger';
 ?>

@@ -53,13 +53,28 @@ class RainGaugeModel {
     function list_samples($hostname, $starttime = null, $endtime = null) {
         // get a list of all the .tar.gz files we receive
         $result = array();
+        $triggers = array();
         $collection_dir = $this->collection_dir() . '/' . $hostname;
+
+        $SERVERDIR = opendir($collection_dir);
+        while ($file = readdir($SERVERDIR)) {
+            $time_part = substr($file, 0, 19);
+            $trigger = substr($file, 20, 7);
+            $reason = substr($file, 28);
+            $format = "%Y_%m_%d_%H_%M_%S";
+            $time = strptime($time_part, $format);
+            $timestamp = mktime($time['tm_hour'], $time['tm_min'], $time['tm_sec'], $time['tm_mon'] + 1, $time['tm_mday'], $time['tm_year'] + 1900);
+            if ($trigger == "trigger") {
+                $triggers[$timestamp] = $reason;
+            }
+        }
+        closedir($SERVERDIR);
+
         $SERVERDIR = opendir($collection_dir);
         while ($file = readdir($SERVERDIR)) {
             $time_part = substr($file, -26);
             $format = "%Y_%m_%d_%H_%M_%S.tar.gz";
             $time = strptime($time_part, $format);
-
 
             if (is_array($time)) {
                 $timestamp = mktime($time['tm_hour'], $time['tm_min'], $time['tm_sec'], $time['tm_mon'] + 1, $time['tm_mday'], $time['tm_year'] + 1900);
@@ -74,6 +89,7 @@ class RainGaugeModel {
                     'timestamp' => $timestamp,
                     'size' => filesize(join('/', array($collection_dir, $file))),
                     'name' => $file,
+                    'trigger' => $triggers[$timestamp]
                 );
             }
         }
