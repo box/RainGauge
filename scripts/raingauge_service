@@ -34,7 +34,7 @@ ptstalk_start() {
     fi
     RETVAL=$?
   fi
-  (( $RETVAL == 0 )) && touch /var/lock/subsys/ptstalk
+  (( $RETVAL == 0 )) && touch /var/lock/ptstalk
   return $RETVAL
 }
 
@@ -42,7 +42,7 @@ ptstalk_stop() {
   echo "Stopping pt-stalk..."
   kill $( cat "${PT_PID_FILE}" )
   RETVAL=$?
-  [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/ptstalk
+  [ $RETVAL -eq 0 ] && rm -f /var/lock/ptstalk
   return $RETVAL
 }
 
