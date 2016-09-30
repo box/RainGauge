@@ -6,9 +6,6 @@ source /etc/raingauge_rc
 if [[ -n "$PT_MYSQL_USER" ]] && [[ -n "$PT_MYSQL_PASS" ]]
 then
         userPassArgs="-u${PT_MYSQL_USER} -p${PT_MYSQL_PASS}"
-elif [[ -n "$PT_MYSQL_USER" ]]
-then
-        userPassArgs="-u${PT_MYSQL_USER}"
 else
         userPassArgs=
 fi
