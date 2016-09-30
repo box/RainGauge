@@ -14,8 +14,7 @@ source /etc/raingauge_rc
 validate_config() {
   # If all the variables are set, 0 is returned. Otherwise, non-zero status will be returned
   [[ ! -z "${PT_STALK_PROG}" ]] && [[ ! -z "${PT_STALK_EXECUTE_AFTER}" ]]  && \
-  [[ ! -z "${PT_MYSQL_USER}" ]] && [[ ! -z "${PT_MYSQL_PASS}" ]]  && \
-  [[ ! -z "${PT_MYSQL_SOCKET}" ]] && [[ ! -z "${PT_PID_FILE}" ]] && \
+  [[ ! -z "${PT_MYSQL_USER}" ]] && [[ ! -z "${PT_MYSQL_SOCKET}" ]] && [[ ! -z "${PT_PID_FILE}" ]] && \
   [[ ! -z "${PT_STALK_THRESHOLD}" ]] && [[ ! -z "${PT_STALK_CYCLES}" ]]  && [[ ! -z "${PT_STALK_ITERATIONS}" ]] && \
   [[ ! -z "${PT_STALK_SLEEP}" ]] && [[ ! -z "${PT_STALK_COLLECT_DIR}" ]] && [[ ! -z "${PT_STALK_VARIABLE}" ]]
 }
@@ -26,11 +25,19 @@ ptstalk_start() {
   if (( $RETVAL == 0 ))
   then
     echo "Starting pt-stalk..."
+
+    if [[ -z "${PT_MYSQL_PASS}" ]]
+    then
+      PT_MYSQL_PASS_ARG=""
+    else
+      PT_MYSQL_PASS_ARG="-p\"${PT_MYSQL_PASS}\""
+    fi
+
     if [[ -z "${PT_STALK_FUNCTION}" ]]
     then
-      HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
     else
-      HOME="/root" "${PT_STALK_PROG}" --daemonize --function="${PT_STALK_FUNCTION}" --variable=test_triggered --threshold=0 --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" -p"${PT_MYSQL_PASS}"
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --function="${PT_STALK_FUNCTION}" --variable=test_triggered --threshold=0 --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
     fi
     RETVAL=$?
   fi
