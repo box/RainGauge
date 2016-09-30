@@ -1,7 +1,11 @@
-[![Project Status](http://opensource.box.com/badges/maintenance.svg)](http://opensource.box.com/badges)
+
 
 Box Rain Gauge
 ==============
+[![Project Status](http://opensource.box.com/badges/maintenance.svg)](http://opensource.box.com/badges)
+[![Travis](https://img.shields.io/travis/box/RainGauge.svg?maxAge=2592000)](https://travis-ci.org/box/RainGauge)
+[![Join the chat at https://gitter.im/box/Anemometer](https://badges.gitter.im/box/RainGauge.svg)](https://gitter.im/box/RainGauge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 Rain Gauge is a tool to simplify the process of collecting detailed information from mysql database servers when specific conditions are triggered.  Collections are packaged and centralised in one place, with a convenient web interface to let you explore the data easily.  This tool uses a modified version of the percona toolkit script pt-stalk to handle collecting data from remote servers.
 
