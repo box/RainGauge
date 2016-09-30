@@ -30,14 +30,27 @@ ptstalk_start() {
     then
       PT_MYSQL_PASS_ARG=""
     else
-      PT_MYSQL_PASS_ARG="-p\"${PT_MYSQL_PASS}\""
+        if test -z "${PT_MYSQL_PASS}"
+        then
+            PT_MYSQL_PASS_ARG="-p\"\""
+        else
+            PT_MYSQL_PASS_ARG="-p${PT_MYSQL_PASS}"
+        fi
     fi
 
     if [[ -z "${PT_STALK_FUNCTION}" ]]
     then
-      HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --variable="${PT_STALK_VARIABLE}" \
+        --threshold="${PT_STALK_THRESHOLD}" --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" \
+        --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" \
+        --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- \
+        -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
     else
-      HOME="/root" "${PT_STALK_PROG}" --daemonize --function="${PT_STALK_FUNCTION}" --variable=test_triggered --threshold=0 --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
+      HOME="/root" "${PT_STALK_PROG}" --daemonize --function="${PT_STALK_FUNCTION}" \
+        --variable=test_triggered --threshold=0 --pid="${PT_PID_FILE}" --cycles="${PT_STALK_CYCLES}" \
+        --sleep="${PT_STALK_SLEEP}" --exec-after-sleep="${PT_STALK_EXECUTE_AFTER}" \
+        --dest="${PT_STALK_COLLECT_DIR}" ${PT_STALK_EXTRA_OPTIONS} -- \
+        -S "${PT_MYSQL_SOCKET}" -u "${PT_MYSQL_USER}" "${PT_MYSQL_PASS_ARG}"
     fi
     RETVAL=$?
   fi
@@ -67,8 +80,21 @@ case "$1" in
   restart)
     ptstalk_restart
     ;;
+  status)
+    echo -n "RainGauge status: "
+    if test -f "${PT_PID_FILE}"
+    then
+        set -e
+        kill -0 $(cat ${PT_PID_FILE})
+        echo "running"
+        set +e
+    else
+        echo "stopped"
+        exit -1
+    fi
+    ;;
   *)
-    echo "Usage: $0 {start|stop|restart}"
+    echo "Usage: $0 {start|stop|restart|status}"
     exit 1
     ;;
 esac

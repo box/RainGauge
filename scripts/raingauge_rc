@@ -1,3 +1,4 @@
+#@IgnoreInspection BashAddShebang
 # rc file for the raingauge service.
 # define all options here to pass to the init script
 

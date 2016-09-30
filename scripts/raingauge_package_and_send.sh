@@ -27,6 +27,6 @@ fi
 tar -zcf "$FILE" -C "$PT_STALK_COLLECT_DIR" .
 if [[ -r "$FILE" ]]; then
         rm -f "$PT_STALK_COLLECT_DIR"/*
-	curl -F "file=@$FILE" $RG_CURL_PARAMS "$URL"
+	curl -F "file=@$FILE" $RG_CURL_PARAMS "$URL" > /dev/null 2>&1
         rm -f "$FILE"
 fi
