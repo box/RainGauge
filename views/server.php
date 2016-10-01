@@ -9,8 +9,8 @@
 
 
 
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.selection.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.7.0/jquery.flot.selection.min.js"></script>
 <script>
 // urls to retrieve data from
 /*
