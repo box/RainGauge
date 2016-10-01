@@ -211,7 +211,7 @@ class RainGauge {
             }
             else if ($file_type == 'stacktrace')
             {
-                $data['file_data'] = htmlspecialchars($this->model->pmp_summary($data['sample'],$data['file']));
+                $data['file_data'] = htmlspecialchars($this->model->pmp_summary($data['sample'],$data['file'], $data['server']));
                 $data['file_data'] .= "<br/><hr>";
             }
             else if ($file_type == 'mutex-status2')
@@ -230,7 +230,11 @@ class RainGauge {
                 $data['file_data'] .= join("\n", array_map(function ($x,$y) { return "$x = $y"; } , array_keys($mutexes), array_values($mutexes)));
                 $data['file_data'] .= "<hr>";
             }
-        } else {
+        }
+        else if ($file_type == 'custom-plaintext') {
+                $data['file_data'] = $data['file'];
+	    }
+        else {
             $data['file_lines'] = $this->model->sift($data['server'], $data['sample'], get_var('sift'));
         }
         $data['percent'] = $this->model->get_sample_percent($data['server'], $data['sample']);
